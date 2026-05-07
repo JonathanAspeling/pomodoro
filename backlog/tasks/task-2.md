@@ -1,11 +1,11 @@
 ---
 id: TASK-2
 title: Define Core App Constants and State Manager Module
-status: To Do
+status: Done
 priority: high
 milestone: v1.0
 assignee: []
-updated_date: '2026-05-07 16:08'
+updated_date: '2026-05-07 16:39'
 labels:
   - javascript
   - logic
@@ -22,9 +22,9 @@ state variables, preventing hardcoding across the codebase.
 
 ## Acceptance Criteria
 
-- [ ] A constant object defines default durations in seconds for: `POMODORO`, `SHORT_BREAK`, and `LONG_BREAK`.
-- [ ] Global state variables are initialized: `currentState` ('IDLE'), `currentSessionType`, `remainingTimeSeconds`,
-- [ ] Implementation of a function that calculates the *next* session type and duration based on the current
+- [x] A constant object defines default durations in seconds for: `POMODORO`, `SHORT_BREAK`, and `LONG_BREAK`.
+- [x] Global state variables are initialized: `currentState` ('IDLE'), `currentSessionType`, `remainingTimeSeconds`,
+- [x] Implementation of a function that calculates the *next* session type and duration based on the current
 
 ## Definition of Done
 
@@ -42,8 +42,29 @@ state variables, preventing hardcoding across the codebase.
 
 This module is the "source of truth" for the entire application. All other tasks must read from it.
 
-## Final Summary
+Starting implementation for TASK-2. This task involves creating a centralized state management module and defining core constants. I will create src/js/constants.js to house the immutable values and logic. Will proceed by implementing ACs sequentially.
+
+Created the core state management module in `src/js/constants.js`. This file now centralizes all constants (POMODORO, SHORT_BREAK, LONG_BREAK) and provides functions (`getState`, `updateState`, `getNextSession`) to manage the application's global state, fulfilling all AC requirements.
+
+The core state management module is complete and tested in isolation. Ready for integration with the timer logic.
 
 ## Final Summary
 
-(Written by agent upon completion)
+### Implementation Summary (TASK-2)
+
+This task successfully established the single source of truth for application constants and global state management, which is critical for maintaining a scalable and predictable codebase.
+
+**Key Changes:**
+*   **`src/js/constants.js`**: Created this module to house all immutable values (e.g., `POMODORO`, `SHORT_BREAK`) and the core state logic.
+*   **State Management Functions:** Implemented `updateState(type, duration)` to ensure that any change in session type or time is logged and applied consistently.
+*   **`getNextSession()` Logic:** Developed a function that correctly cycles through sessions (Focus -> Short Break -> Focus -> Long Break...), ensuring the application always knows what state to transition to next.
+
+**Acceptance Criteria Covered:**
+1.  ✅ Constant object defined for all default durations (`CONSTANTS`).
+2.  ✅ Global state variables initialized and managed (`state` object).
+3.  ✅ Function implemented to calculate the *next* session type and duration based on the current cycle.
+
+**Next Steps:**
+The next tasks will consume this module:
+1.  Implement the main timer logic (likely in `src/js/timer.js`) which reads from `constants.js`.
+2.  Integrate UI updates to reflect state changes, using the constants for initial values and the state manager for transitions.

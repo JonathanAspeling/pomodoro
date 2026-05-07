@@ -1,0 +1,144 @@
+/* Basic CSS for Pomodoro Timer */
+
+/* Global reset and centering */
+body {
+    font-family: sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    background-color: #f4f7f9; /* Light background */
+    color: #333;
+}
+
+/* Main container styling */
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    max-width: 800px;
+    background: white;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+}
+
+/* Header and Play Button (AC 1) */
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 30px;
+}
+
+.main-header h1 {
+    font-size: 2.5em;
+    margin: 0;
+}
+
+.play-button {
+    padding: 10px 25px;
+    font-size: 1.2em;
+    cursor: pointer;
+    background-color: #e74c3c; /* Red color for play */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+}
+
+.play-button:hover {
+    background-color: #c0392b;
+}
+
+/* Clock Face (AC 2) */
+.clock-face {
+    width: 300px; /* Increased size for better visual impact */
+    height: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.outer-ring {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background-color: #e74c3c; /* Use the primary color */
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Dot Selectors (AC 3) */
+.dot-selectors {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    margin-bottom: 40px;
+}
+
+.dots {
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /* Space between dots */
+}
+
+/* Individual dot styling */
+.dot-group .dot {
+    width: 12px;
+    height: 12px;
+    background-color: #ccc;
+    border-radius: 50%;
+    display: inline-block;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+/* Active dot styling */
+.dot-group .active {
+    background-color: #2ecc71; /* Green for active/completed dots */
+    transform: scale(1.2);
+}
+
+/* Session Selector (AC 4) */
+.session-selector {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.session-selector h2 {
+    font-size: 1.5em;
+    margin-top: 0;
+    color: #555;
+}
+
+.button-group button {
+    padding: 10px 20px;
+    margin: 0 10px;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.button-group button:hover {
+    background-color: #eef;
+    border-color: #aaa;
+}
+
+/* Settings Icon (AC 5) */
+.settings-container {
+    position: absolute; /* Positioning it relative to the main container or body if needed, but for now, let's keep it simple and place it logically */
+    top: 20px;
+    right: 20px;
+}
+
+#settings-button {
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    cursor: pointer;
+    color: #777;
+}

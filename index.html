@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pomodoro Timer</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- Main container for centering and layout -->
+    <div class="container">
+        
+        <!-- Title and Play Button (AC 1) -->
+        <header class="main-header">
+            <h1>Pomodoro Timer</h1>
+            <button id="play-button" class="play-button">Play</button>
+        </header>
+
+        <!-- Outer Ring/Clock Face Container (AC 2) -->
+        <div class="clock-face">
+            <!-- Placeholder for the actual timer display/rings -->
+            <div class="outer-ring"></div>
+        </div>
+
+        <!-- Dot Selectors Containers (AC 3) -->
+        <div class="dot-selectors">
+            <div class="dots dot-group" data-count="4"></div>
+            <div class="dots dot-group" data-count="4"></div>
+        </div>
+
+        <!-- Session Selector Section (AC 4) -->
+        <section class="session-selector">
+            <h2>Select Session</h2>
+            <div id="session-buttons" class="button-group">
+                <button data-session="focus">Focus</button>
+                <button data-session="shortBreak">Short Break</button>
+                <button data-session="longBreak">Long Break</button>
+            </div>
+        </section>
+
+        <!-- Settings Icon (AC 5) -->
+        <div class="settings-container">
+            <button id="settings-button" aria-label="Settings">&#9881;</button>
+        </div>
+
+    </div>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
