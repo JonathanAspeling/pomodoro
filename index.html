@@ -6,74 +6,43 @@
     <title>Pomodoro Timer</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body >
+<body>
+  <nav class="top-nav">
+    <button id="menu-button" class="menu-button" aria-label="Menu">&#9776;</button>
+  </nav>
 
-    <!-- Main container for centering and layout -->
-    <div class="container">
-        
-        <!-- Title and Play Button (AC 1) -->
-        <header class="main-header">
-            <h1>Pomodoro Timer</h1>
-            <button id="play-button" class="play-button">Play</button>
-        </header>
-
-        <!-- Outer Ring/Clock Face Container (AC 2) -->
-        <div class="clock-face">
-            <!-- Placeholder for the actual timer display/rings -->
-            <div class="outer-ring">
-                <div id="time-circle" class="inner-circle">
-                    <span id="timer-display" class="timer-display">25:00</span>
-                </div>
-            </div >
-
+  <main class="timer-stage">
+    <div class="tick-ring" id="tick-ring"></div>
+    <div class="clock-face">
+      <div class="outer-ring">
+        <div id="time-circle" class="inner-circle">
+          <button id="play-button" class="play-button" aria-label="Play">&#9654;</button>
         </div>
+      </div>
+    </div>
+    <div class="dot-selectors">
+      <div class="dots dot-group" data-count="4">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      </div>
+      <div class="dots dot-group" data-count="4">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      </div>
+    </div>
+    <p class="session-label"><span id="session-type">POMODORO</span> <span id="session-duration">25 MIN</span></p>
+  </main>
 
-        <!-- Dot Selectors Containers (AC 3) -->
-        <div class="dot-selectors">
-            <div class="dots dot-group" data-count="4">
-                <span class="dot"></span>
-                <span class="dot"></span>
-                <span class="dot"></span>
-                <span class="dot"></span>
-            </div>
-            <div class="dots dot-group" data-count="4">
-                <span class="dot"></span>
-                <span class="dot"></span>
-                <span class="dot"></span>
-                <span class="dot"></span>
-            </div>
-        </div >
+  <div id="settings-panel" class="settings-panel hidden">
+    <h3>Customize Durations (minutes)</h3>
+    <label>Focus: <input id="setting-focus" type="number" min="1" max="60" value="25"></label>
+    <label>Short Break: <input id="setting-short" type="number" min="1" max="60" value="5"></label>
+    <label>Long Break: <input id="setting-long" type="number" min="1" max="60" value="15"></label>
+    <div class="settings-actions">
+      <button id="settings-save">Save</button>
+      <button id="settings-cancel">Cancel</button>
+    </div>
+    <p id="settings-error" class="settings-error hidden"></p>
+  </div>
 
-        <!-- Session Selector Section (AC 4) -->
-        <section class="session-selector">
-            <h2>Select Session</h2>
-            <div id="session-buttons" class="button-group">
-                <button data-session="focus">Focus</button>
-                <button data-session="shortBreak">Short Break</button>
-                <button data-session="longBreak">Long Break</button>
-            </div>
-        </section>
-
-        <!-- Settings Icon (AC 5) -->
-        <div class="settings-container">
-            <button id="settings-button" aria-label="Settings">&#9881;</button>
-        </div>
-
-        <!-- Settings Panel (hidden by default) -->
-        <div id="settings-panel" class="settings-panel hidden">
-            <h3>Customize Durations (minutes)</h3>
-            <label>Focus: <input id="setting-focus" type="number" min="1" max="60" value="25"></label><br>
-            <label>Short Break: <input id="setting-short" type="number" min="1" max="60" value="5"></label><br>
-            <label>Long Break: <input id="setting-long" type="number" min="1" max="60" value="15"></label><br>
-            <div class="settings-actions">
-                <button id="settings-save">Save</button>
-                <button id="settings-cancel">Cancel</button>
-            </div>
-            <p id="settings-error" class="settings-error hidden"></p>
-        </div>
-
-    </div >
-
-    <script type="module" src="js/main.js"></script>
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>

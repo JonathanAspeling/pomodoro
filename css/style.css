@@ -1,28 +1,26 @@
-/* Basic CSS for Pomodoro Timer */
+/* Basic CSS for Pomodoro Timer - Mobile Minimal Amber Theme */
 
 /* Global reset and centering */
 body {
-    font-family: sans-serif;
+    font-family: 'Arial', sans-serif; /* Using a common, clean font */
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
     margin: 0;
-    background-color: #f4f7f9; /* Light background */
+    background-color: #C8973A; /* Rich golden/amber background color */
     color: #333;
 }
 
-/* Main container styling */
+/* Main container styling - Removed white card look */
 .container {
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 20px;
-    max-width: 800px;
-    background: white;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    border-radius: 12px;
-    position: relative; /* Added for absolute positioning of settings panel */
+    max-width: 90%; /* More mobile friendly width */
+    background: none; /* No background color on the container itself */
+    box-shadow: none; /* Removing box shadow for a flatter, more integrated look */
 }
 
 /* Header and Play Button (AC 1) */
@@ -35,41 +33,59 @@ body {
 }
 
 .main-header h1 {
-    font-size: 2.5em;
+    font-size: 2em; /* Slightly smaller for mobile feel */
     margin: 0;
+    color: #5c401a; /* Darker brown/gold contrast color */
 }
 
 .play-button {
     padding: 10px 25px;
-    font-size: 1.2em;
+    font-size: 1em;
     cursor: pointer;
-    background-color: #e74c3c; /* Red color for play */
-    color: white;
+    background-color: transparent; /* Transparent background */
+    color: #C8973A; /* Match the amber background color for integration */
     border: none;
-    border-radius: 8px;
-    transition: background-color 0.2s;
+    border-radius: 50px; /* Pill shape for modern look */
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .play-button:hover {
-    background-color: #c0392b;
+    background-color: rgba(200, 151, 58, 0.1); /* Subtle hover effect */
 }
 
 /* Clock Face (AC 2) */
 .clock-face {
-    width: 300px; /* Increased size for better visual impact */
+    width: 300px;
     height: 300px;
     display: flex;
     justify-content: center;
     align-items: center;
     margin-bottom: 40px;
+    position: relative; /* Needed for absolute positioning of markers */
 }
 
+/* Outer Ring Styling (Visible Border) */
 .outer-ring {
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    background-color: #e74c3c; /* Use the primary color */
-    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
+    background-color: transparent; /* Transparent background */
+    border: 8px solid #C8973A; /* Visible border ring using the amber color */
+    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+/* Tick Marks (Minute Markers) - Using pseudo-elements for simplicity/concept */
+.outer-ring::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    /* We will simulate ticks using radial gradients or complex positioning, but for pure CSS structure update, we'll rely on the border and add a conceptual marker layer */
 }
 
 /* Inner Circle Styling (Timer Display Area) */
@@ -77,23 +93,23 @@ body {
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    background-color: white;
+    background-color: white; /* Keeping the display area white for contrast */
     position: absolute;
     top: 0;
     left: 0;
     transition: transform 0.3s ease-out;
     transform: scale(1);
-    /* Added centering properties */
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: 2; /* Ensure it sits above the outer ring */
 }
 
 /* Timer Display Text Styling */
 .timer-display {
-    font-size: 2.2em;
-    font-weight: bold;
-    color: #333;
+    font-size: 3em; /* Larger and bolder for impact */
+    font-weight: 600;
+    color: #5c401a; /* Dark contrast color */
     user-select: none;
     pointer-events: none;
 }
@@ -113,11 +129,11 @@ body {
     gap: 8px; /* Space between dots */
 }
 
-/* Individual dot styling */
+/* Individual dot styling - Small, subtle white, low opacity when inactive */
 .dot-group .dot {
-    width: 12px;
-    height: 12px;
-    background-color: #ccc;
+    width: 10px; /* Smaller size */
+    height: 10px;
+    background-color: rgba(255, 255, 255, 0.4); /* Subtle white with low opacity */
     border-radius: 50%;
     display: inline-block;
     transition: background-color 0.3s, transform 0.3s;
@@ -125,8 +141,9 @@ body {
 
 /* Active dot styling */
 .dot-group .active {
-    background-color: #2ecc71; /* Green for active/completed dots */
+    background-color: white; /* Solid white when active */
     transform: scale(1.2);
+    opacity: 1;
 }
 
 /* Session Selector (AC 4) */
@@ -136,13 +153,15 @@ body {
 }
 
 .session-selector h2 {
-    font-size: 1.5em;
+    font-size: 1em; /* Small size */
+    letter-spacing: 3px; /* Uppercase feel */
+    color: rgba(92, 64, 26, 0.5); /* Slightly transparent dark color */
+    text-transform: uppercase; /* Ensure uppercase look */
     margin-top: 0;
-    color: #555;
 }
 
 .button-group button {
-    padding: 10px 20px;
+    padding: 8px 18px;
     margin: 0 10px;
     border: 1px solid #ccc;
     background-color: #f9f9f9;
@@ -158,7 +177,7 @@ body {
 
 /* Settings Icon (AC 5) */
 .settings-container {
-    position: absolute; /* Positioning it relative to the main container or body if needed, but for now, let's keep it simple and place it logically */
+    position: absolute;
     top: 20px;
     right: 20px;
 }
@@ -166,7 +185,7 @@ body {
 #settings-button {
     background: none;
     border: none;
-    font-size: 1.5em;
+    font-size: 1.8em; /* Slightly larger icon */
     cursor: pointer;
     color: #777;
 }

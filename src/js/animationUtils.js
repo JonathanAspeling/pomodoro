@@ -34,11 +34,13 @@ export function calculateScaleFactor(currentTimeSeconds, totalDurationSeconds) {
 export function updateTimeCircleAnimation(scaleFactor) {
     if (!timeCircleElement) return;
 
-    // Apply CSS transform for smooth scaling effect
-    timeCircleElement.style.transform = `scale(${scaleFactor})`;
-    
-    // Optionally, adjust width/height to ensure it always fits the parent container's dimensions 
-    // while maintaining the scale transformation. Since we are using 'scale', this is usually sufficient.
+    // Preserve existing transforms (like centering translations) and append the scale effect.
+    let currentTransform = timeCircleElement.style.transform;
+    if (currentTransform) {
+        timeCircleElement.style.transform = `${currentTransform} scale(${scaleFactor})`;
+    } else {
+        timeCircleElement.style.transform = `scale(${scaleFactor})`;
+    }
 }
 
 /**
@@ -46,6 +48,12 @@ export function updateTimeCircleAnimation(scaleFactor) {
  */
 export function resetTimeCircleAnimation() {
     if (timeCircleElement) {
-        timeCircleElement.style.transform = `scale(1)`;
+        // Preserve existing transforms and set scale back to 1.
+        let currentTransform = timeCircleElement.style.transform;
+        if (currentTransform) {
+            timeCircleElement.style.transform = `${currentTransform} scale(1)`;
+        } else {
+            timeCircleElement.style.transform = `scale(1)`;
+        }
     }
 }
