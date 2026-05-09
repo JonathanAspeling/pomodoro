@@ -1,7 +1,5 @@
-# Add any files or directories you want Git to ignore here
-# Examples:
-# *.log
-# /target/
-# .idea/
-
 .aider*
+.idea/
+.DS_Store
+.vscode/
+.claude/
