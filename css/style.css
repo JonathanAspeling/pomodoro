@@ -1,257 +1,517 @@
-/* Basic CSS for Pomodoro Timer - Mobile Minimal Amber Theme */
+/* === Reset === */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* Global reset and centering */
 body {
-    font-family: 'Arial', sans-serif; /* Using a common, clean font */
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    font-family: sans-serif;
     min-height: 100vh;
-    margin: 0;
-    background-color: #C8973A; /* Rich golden/amber background color */
-    color: #333;
-    position: relative; /* Ensures absolute positioning context is the viewport/body itself */
-}
-
-/* Main container styling - Removed white card look */
-.container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 20px;
-    max-width: 90%; /* More mobile friendly width */
-    background: none; /* No background color on the container itself */
-    box-shadow: none; /* Removing box shadow for a flatter, more integrated look */
+    justify-content: center;
+    background-color: var(--bg-color, #C8973A);
+    color: white;
+    overflow: hidden;
 }
 
-/* Header and Play Button (AC 1) */
-.main-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    margin-bottom: 30px;
+/* === Top Nav === */
+.top-nav {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 50;
 }
 
-.main-header h1 {
-    font-size: 2em; /* Slightly smaller for mobile feel */
-    margin: 0;
-    color: #5c401a; /* Darker brown/gold contrast color */
-}
-
-.play-button {
-    padding: 10px; /* Adjusted padding to frame the icon better */
-    font-size: 1em;
-    cursor: pointer;
-    background-color: transparent; /* Transparent background */
-    color: #C8973A; /* Match the amber background color for integration */
+.menu-button {
+    background: none;
     border: none;
-    /* Removed border-radius and box-shadow to make it look like a bare icon */
-    transition: all 0.2s;
+    color: white;
+    font-size: 1.5em;
+    cursor: pointer;
+    opacity: 0.9;
+}
+.menu-button:hover { opacity: 1; }
+
+/* === Timer Stage === */
+.timer-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 28px;
 }
 
-.play-button:hover {
-    opacity: 0.8; /* Subtle hover effect by changing opacity instead of background color */
-}
-
-/* Clock Face (AC 2) */
+/* === Clock Face === */
 .clock-face {
-    width: 75vw; /* Responsive width based on viewport size */
-    height: 75vw; /* Maintains aspect ratio */
-    max-width: 500px; /* Caps the size on very large screens */
+    width: 72vmin;
+    height: 72vmin;
+    max-width: 340px;
+    max-height: 340px;
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-bottom: 40px;
-    position: relative; /* Needed for absolute positioning of markers */
+    position: relative;
 }
 
-/* Outer Ring Styling (Visible Border) */
+/* === Tick Marks === */
+.tick {
+    position: absolute;
+    width: 3px;
+    height: 14px;
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: 2px;
+    left: calc(50% - 1.5px);
+    top: -16px;
+    pointer-events: none;
+}
+
+/* === Outer Ring === */
 .outer-ring {
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    background-color: transparent; /* Transparent background */
-    border: 8px solid #C8973A; /* Visible border ring using the amber color */
-    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.1);
-    position: relative; /* Needed for absolute positioning of markers */
+    background: transparent;
+    border: 8px solid white;
+    position: relative;
 }
 
-/* Tick Marks (Minute Markers) - New styling for generated elements */
-.tick-marker {
-    position: absolute;
-    top: 0;
-    left: 50%; /* Will be adjusted by JS to position correctly */
-    transform: translate(-50%, 0); /* Center horizontally, start at top edge */
-    width: 2px; /* Thickness of the tick line */
-    height: 10px; /* Length of the visible marker */
-    background-color: white; /* White color for visibility */
-    box-shadow: 0 0 3px rgba(0, 0, 0, 0.2); /* Subtle shadow effect */
-}
-
-/* Inner Circle Styling (Timer Display Area) */
+/* === Inner Circle === */
 .inner-circle {
-    width: calc(100% - 20px); /* Reduced size to create bezel gap */
-    height: calc(100% - 20px); /* Reduced size to create bezel gap */
+    width: calc(100% - 16px);
+    height: calc(100% - 16px);
     border-radius: 50%;
-    background-color: white; /* Keeping the display area white for contrast */
-    position: absolute;
-    top: 10px; /* Offset by half the reduction amount (10px) */
-    left: 10px; /* Offset by half the reduction amount (10px) */
-    transition: transform 0.3s ease-out;
-    transform: scale(1);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 2; /* Ensure it sits above the outer ring */
-}
-
-/* Timer Display Text Styling */
-.timer-display {
-    font-size: 3em; /* Larger and bolder for impact */
-    font-weight: 600;
-    color: #5c401a; /* Dark contrast color */
-    user-select: none;
-    pointer-events: none;
-}
-
-
-/* Dot Selectors (AC 3) */
-.dot-selectors {
-    display: flex;
-    justify-content: center; /* Changed to center for better overall centering of the row */
-    width: 100%;
-    margin-bottom: 40px;
-}
-
-.dots {
-    display: flex;
-    flex-direction: row; /* Changed from column to row */
-    gap: 8px; /* Space between dots */
-}
-
-/* Individual dot styling - Small, subtle white, low opacity when inactive */
-.dot-group .dot {
-    width: 10px; /* Smaller size */
-    height: 10px;
-    background-color: rgba(255, 255, 255, 0.4); /* Subtle white with low opacity */
-    border-radius: 50%;
-    display: inline-block;
-    transition: background-color 0.3s, transform 0.3s;
-}
-
-/* Active dot styling */
-.dot-group .active {
-    background-color: white; /* Solid white when active */
-    transform: scale(1.2);
-    opacity: 1;
-}
-
-/* Session Selector (AC 4) */
-.session-selector {
-    text-align: center;
-    margin-bottom: 30px;
-}
-
-.session-selector h2 {
-    font-size: 1em; /* Small size */
-    letter-spacing: 3px; /* Uppercase feel */
-    color: rgba(92, 64, 26, 0.5); /* Slightly transparent dark color */
-    text-transform: uppercase; /* Ensure uppercase look */
-    margin-top: 0;
-}
-
-.button-group button {
-    padding: 8px 18px;
-    margin: 0 10px;
-    border: 1px solid #ccc;
-    background-color: #f9f9f9;
-    cursor: pointer;
-    border-radius: 6px;
-    transition: background-color 0.2s, border-color 0.2s;
-}
-
-.button-group button:hover {
-    background-color: #eef;
-    border-color: #aaa;
-}
-
-/* Settings Icon (AC 5) */
-.settings-container {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-}
-
-#settings-button {
-    background: none;
-    border: none;
-    font-size: 1.8em; /* Slightly larger icon */
-    cursor: pointer;
-    color: #777;
-}
-
-/* Settings Panel */
-.settings-panel {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+/* === Sweep Canvas === */
+.sweep-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    z-index: 1;
+    transition: opacity 0.35s ease;
+}
+
+/* === Play/Pause Button === */
+.play-button {
+    background: none;
+    border: none;
+    font-size: 4.5em;
+    color: white;
+    cursor: pointer;
+    line-height: 1;
+    padding-left: 10px;
+    position: relative;
+    z-index: 2;
+    transition: transform 0.1s, opacity 0.25s ease;
+}
+.play-button:hover { transform: scale(1.08); }
+.play-button:active { transform: scale(0.95); }
+
+.inner-circle.running .play-button {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.inner-circle.paused .sweep-canvas {
+    opacity: 0.2;
+}
+.inner-circle.paused .play-button {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* === Dot Selectors === */
+.dot-selectors {
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 340px;
+}
+
+.dot-group {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+}
+
+.dot-group .dot {
+    width: 8px;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.35);
+    border-radius: 50%;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.dot-group .active {
     background: white;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    padding: 24px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-    z-index: 100;
+    transform: scale(1.3);
+}
+
+/* === Session Info Area === */
+.session-info-area {
+    display: grid;
+    place-items: center;
+    width: 100%;
+}
+
+#idle-label,
+#running-display {
+    grid-area: 1 / 1;
+    transition: opacity 0.25s ease;
+}
+
+/* === Session Label (idle) === */
+.session-label {
+    font-size: 0.85em;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    user-select: none;
+    text-align: center;
+}
+
+#session-type { font-weight: bold; opacity: 0.9; }
+#session-duration { font-weight: 400; opacity: 0.7; }
+
+.session-label:hover #session-type,
+.session-label:hover #session-duration { opacity: 1; }
+
+/* === Running Display === */
+.running-display {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    min-width: 260px;
-}
-
-.settings-panel h3 {
-    margin: 0 0 8px;
-    font-size: 1.1em;
-}
-
-.settings-panel label {
-    display: flex;
-    justify-content: space-between;
     align-items: center;
-    font-size: 0.95em;
+    gap: 2px;
+    text-align: center;
 }
 
-.settings-panel input[type="number"] {
-    width: 60px;
-    padding: 4px 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 1em;
+.running-session-name {
+    font-size: 0.85em;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: bold;
+    opacity: 0.9;
 }
 
-.settings-actions {
+.running-time {
+    font-size: 0.85em;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    opacity: 0.7;
+}
+
+/* === Reset Button === */
+.reset-button {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 0.85em;
+    cursor: pointer;
+    letter-spacing: 0.08em;
+    padding: 8px 16px;
+    transition: color 0.2s, opacity 0.25s ease;
+}
+.reset-button:hover { color: white; }
+
+/* === Opacity-based hiding === */
+.invisible {
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* === Utility === */
+.hidden { display: none !important; }
+
+/* ============================================================
+   SETTINGS PAGE
+   ============================================================ */
+
+.settings-page {
+    position: fixed;
+    inset: 0;
+    background-color: var(--bg-color, #C8973A);
+    z-index: 200;
+    overflow-y: auto;
+    color: white;
+}
+
+.settings-page:not(.hidden) {
+    animation: settingsFadeIn 0.2s ease;
+}
+
+@keyframes settingsFadeIn {
+    from { opacity: 0; transform: translateX(16px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+.settings-header {
+    padding: 12px 16px 0;
+    position: sticky;
+    top: 0;
+    background-color: var(--bg-color, #C8973A);
+    z-index: 10;
+}
+
+.settings-back {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 3em;
+    cursor: pointer;
+    line-height: 1;
+    opacity: 0.85;
+    padding: 0 4px;
+}
+.settings-back:hover { opacity: 1; }
+
+.settings-content {
+    padding: 8px 20px 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.settings-section-title {
+    font-size: 0.72em;
+    letter-spacing: 0.15em;
+    opacity: 0.7;
+    text-align: center;
+    margin-bottom: 12px;
+    font-weight: 400;
+}
+
+/* --- Duration Tiles --- */
+.duration-tiles {
     display: flex;
     gap: 10px;
-    justify-content: flex-end;
 }
 
-.settings-actions button {
-    padding: 6px 18px;
-    border: none;
-    border-radius: 6px;
+.duration-tile {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.18);
+    border-radius: 10px;
+    padding: 20px 8px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
     cursor: pointer;
-    font-size: 0.95em;
+    user-select: none;
+    transition: background 0.15s;
+}
+.duration-tile:hover { background: rgba(255, 255, 255, 0.26); }
+
+.duration-value {
+    font-size: 3em;
+    font-weight: 300;
+    line-height: 1;
 }
 
-#settings-save { background-color: #e74c3c; color: white; }
-#settings-save:hover { background-color: #c0392b; }
-#settings-cancel { background-color: #eee; }
-#settings-cancel:hover { background-color: #ddd; }
-
-.settings-error {
-    color: #c0392b;
-    font-size: 0.85em;
-    margin: 0;
+.duration-label {
+    font-size: 0.65em;
+    letter-spacing: 0.1em;
+    opacity: 0.8;
+    text-align: center;
 }
 
-.hidden { display: none !important; }
+/* Inline number editor (replaces value span) */
+input.num-edit {
+    background: none;
+    border: none;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.6);
+    color: white;
+    text-align: center;
+    outline: none;
+    width: 3ch;
+    -moz-appearance: textfield;
+}
+input.num-edit::-webkit-inner-spin-button,
+input.num-edit::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+/* --- Color Grid --- */
+.color-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    background: white;
+    border-radius: 10px;
+    padding: 12px;
+}
+
+.color-swatch {
+    aspect-ratio: 1;
+    border-radius: 8px;
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.1s;
+}
+.color-swatch:hover { transform: scale(1.06); }
+
+.swatch-check {
+    display: none;
+    width: 36px;
+    height: 36px;
+    background: white;
+    border-radius: 50%;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1em;
+    color: var(--bg-color, #C8973A);
+    pointer-events: none;
+}
+
+.color-swatch.selected .swatch-check {
+    display: flex;
+}
+
+/* --- Sound Tiles --- */
+.sound-tiles {
+    display: flex;
+    gap: 10px;
+}
+
+.sound-tile {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.18);
+    border-radius: 10px;
+    padding: 24px 12px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    cursor: pointer;
+    transition: background 0.15s;
+    text-align: center;
+    user-select: none;
+}
+.sound-tile:hover { background: rgba(255, 255, 255, 0.26); }
+
+.sound-icon-circle {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5em;
+    color: rgba(255, 255, 255, 0.5);
+    transition: background 0.2s, color 0.2s;
+}
+
+.sound-tile.active .sound-icon-circle {
+    background: white;
+    color: var(--bg-color, #C8973A);
+}
+
+.sound-label {
+    font-size: 0.65em;
+    letter-spacing: 0.1em;
+    opacity: 0.85;
+}
+
+/* --- Pref Number Tiles --- */
+.pref-number-tiles {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.pref-number-tile {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.18);
+    border-radius: 10px;
+    padding: 20px 8px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+}
+.pref-number-tile:hover { background: rgba(255, 255, 255, 0.26); }
+
+.pref-number-value {
+    font-size: 3em;
+    font-weight: 300;
+    line-height: 1;
+}
+
+.pref-number-label {
+    font-size: 0.65em;
+    letter-spacing: 0.08em;
+    opacity: 0.8;
+    text-align: center;
+    line-height: 1.4;
+}
+
+/* --- Toggle Tiles --- */
+.toggle-tiles {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.toggle-tile {
+    background: rgba(255, 255, 255, 0.18);
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.toggle-opts {
+    display: flex;
+    gap: 20px;
+}
+
+.toggle-opt {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.25);
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 1.3em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, color 0.2s;
+    pointer-events: none;
+}
+
+.toggle-opt.active {
+    background: white;
+    color: var(--bg-color, #C8973A);
+}
+
+.toggle-label {
+    font-size: 0.7em;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.9;
+}

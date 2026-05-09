@@ -1,233 +1,223 @@
-// This file should contain the main entry point for the application logic, 
-// initializing event listeners and setting up the initial state of the Pomodoro timer.
+import { loadDurations, saveDurations, loadSettings, saveSettings } from './storageManager.js';
+import { SESSION_ORDER, SESSION_CONFIG, DEFAULT_SETTINGS } from './constants.js';
+import { resizeCanvas, drawSweep, generateTicks } from './clockFace.js';
+import { renderDots, updateDots } from './dots.js';
+import { playFeedback } from './audio.js';
+import { initSettingsPage, openSettings } from './settingsPage.js';
 
-import { calculateScaleFactor, updateTimeCircleAnimation, resetTimeCircleAnimation } from '../src/js/animationUtils.js';
-import { loadDurations, saveDurations } from '../src/js/storageManager.js';
+// --- State ---
+let durations = { focus: 25, short: 5, long: 15 };
+let appSettings = { ...DEFAULT_SETTINGS };
+let currentSession = 'focus';
+let completedPomodoros = 0;
 
-let currentTimerInterval = null;
-let totalDurationSeconds = 0;
-let elapsedTimeSeconds = 0;
-let durations = { focus: 25, short: 5, long: 15 }; // Default durations in minutes
-const sessionTypes = ['focus', 'shortBreak', 'longBreak'];
+// Timer state
+let animFrameId = null;
+let runStartTime = null;
+let runStartRemaining = 0;
+let remainingSeconds = 0;
+let totalSeconds = 0;
 
-// --- Placeholder Functions (Assuming these exist and work as intended) ---
-function updateTimerDisplay() { /* ... implementation for updating the clock face ... */ }
+// DOM refs (populated in setup)
+let canvas, clockFaceEl, timeCircle, dotContainer, idleLabel, runningDisplay, resetButton, playButton;
 
-/**
- * Plays a simple beep sound using the Web Audio API.
- */
-function playBeep() {
-    try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.frequency.value = 880;
-        gain.gain.setValueAtTime(0.3, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
-        osc.start(ctx.currentTime);
-        osc.stop(ctx.currentTime + 0.6);
-    } catch (e) { /* audio not available */ }
+// --- Formatting ---
+const pad = n => String(n).padStart(2, '0');
+const formatTime = s => `${pad(Math.floor(s / 60))}:${pad(s % 60)}`;
+
+// --- Theme & rendering ---
+function applyTheme(color) {
+    document.documentElement.style.setProperty('--bg-color', color);
 }
 
-/**
- * Displays a temporary status message toast on the screen.
- * @param {string} message - The message to display.
- */
-function showToast(message) {
-    let toast = document.getElementById('status-toast');
-    if (!toast) {
-        toast = document.createElement('div');
-        toast.id = 'status-toast';
-        toast.style.cssText = [
-            'position:fixed', 'bottom:30px', 'left:50%',
-            'transform:translateX(-50%)', 'background:#333',
-            'color:white', 'padding:10px 22px', 'border-radius:20px',
-            'font-size:0.95em', 'opacity:0',
-            'transition:opacity 0.3s', 'pointer-events:none', 'z-index:200'
-        ].join(';');
-        document.body.appendChild(toast);
-    }
-    toast.textContent = message;
-    toast.style.opacity = '1';
-    clearTimeout(toast._t);
-    toast._t = setTimeout(() => { toast.style.opacity = '0'; }, 3000);
+function redrawCanvas() {
+    if (timeCircle.classList.contains('running')) return; // rAF will redraw
+    const remaining = timeCircle.classList.contains('paused') ? remainingSeconds : 0;
+    drawSweep(canvas, remaining, totalSeconds, appSettings.color);
 }
 
-/**
- * Updates the play/pause button icon based on timer state.
- * @param {boolean} isRunning - True if the timer is currently running.
- */
-function updatePlayPauseButtonIcon(isRunning) {
-    const button = document.getElementById('play-pause-button');
-    if (!button) return;
+// --- Session management ---
+function applySession(type) {
+    currentSession = type;
+    const cfg = SESSION_CONFIG[type];
+    totalSeconds = durations[cfg.key] * 60;
+    remainingSeconds = totalSeconds;
 
-    // Assuming '&#x25B6;' is Play and '&#x23ED;' is Pause (or using text symbols)
-    if (isRunning) {
-        button.innerHTML = '&#x23ED;'; // Pause symbol
-        button.setAttribute('aria-label', 'Pause Timer');
-    } else {
-        button.innerHTML = '&#x25B6;'; // Play symbol
-        button.setAttribute('aria-label', 'Start Timer');
-    }
+    document.getElementById('session-type').textContent = cfg.label;
+    document.getElementById('session-duration').textContent = `${durations[cfg.key]} MIN`;
+    document.getElementById('running-session-name').textContent = cfg.label;
+    document.getElementById('running-time').textContent = formatTime(remainingSeconds);
+    drawSweep(canvas, 0, totalSeconds, appSettings.color);
+    generateTicks(clockFaceEl, durations[cfg.key]);
 }
 
-
-/**
- * Starts the timer countdown interval.
- */
-function startTimer() {
-    if (currentTimerInterval) return;
-
-    elapsedTimeSeconds = totalDurationSeconds; // Start from full duration
-    updateTimerDisplay();
-    resetTimeCircleAnimation();
-
-    currentTimerInterval = setInterval(() => {
-        elapsedTimeSeconds--;
-        updateTimerDisplay();
-
-        // Check for timer end condition
-        if (elapsedTimeSeconds < 0) {
-            clearInterval(currentTimerInterval);
-            currentTimerInterval = null;
-            
-            playBeep();
-            showToast('Session complete! Starting next...');
-            // In a real app, you would also trigger the state transition here.
-        } else {
-            updateTimeCircleAnimation(elapsedTimeSeconds);
-        }
-    }, 1000);
-    updatePlayPauseButtonIcon(true); // Update icon to pause when starting
-}
-
-/**
- * Pauses the timer countdown interval.
- */
-function pauseTimer() {
-    if (!currentTimerInterval) return;
-
-    clearInterval(currentTimerInterval);
-    currentTimerInterval = null;
-    updatePlayPauseButtonIcon(false); // Update icon to play when pausing
-}
-
-
-/**
- * Sets a new session duration and resets the timer state.
- * @param {number} durationSeconds - The total duration for the new session.
- */
-function setSession(durationSeconds) { 
-    totalDurationSeconds = durationSeconds;
-    elapsedTimeSeconds = 0;
-    updateTimerDisplay();
-    resetTimeCircleAnimation();
-    // Ensure button icon reflects paused state when changing sessions
-    updatePlayPauseButtonIcon(false); 
-}
-
-/**
- * Cycles through the defined session types (Focus -> Short Break -> Long Break -> Focus).
- */
 function cycleSession() {
-    const currentIndex = sessionTypes.indexOf(document.getElementById('session-label').dataset.currentSession || 'focus');
-    let nextIndex = (currentIndex + 1) % sessionTypes.length;
-    const nextSessionType = sessionTypes[nextIndex];
-
-    // Update the label text and dataset
-    document.getElementById('session-label').textContent = nextSessionType.charAt(0).toUpperCase() + nextSessionType.slice(1).replace(/([A-Z])/g, ' $1');
-    document.getElementById('session-label').dataset.currentSession = nextSessionType;
-
-    let duration;
-    switch (nextSessionType) {
-        case 'focus':    duration = durations.focus * 60; break;
-        case 'shortBreak': duration = durations.short * 60; break;
-        case 'longBreak':  duration = durations.long * 60; break;
-    }
-
-    setSession(duration);
+    if (animFrameId) return;
+    const next = (SESSION_ORDER.indexOf(currentSession) + 1) % SESSION_ORDER.length;
+    applySession(SESSION_ORDER[next]);
 }
 
-
-// --- End Placeholder Functions ---
-
-
-function setupEventListeners() {
-    const playPauseButton = document.getElementById('play-pause-button');
-    const sessionLabel = document.getElementById('session-label');
-    const menuButton = document.getElementById('menu-button');
-    const settingsPanel = document.getElementById('settings-panel');
-    const settingsSave = document.getElementById('settings-save');
-    const settingsCancel = document.getElementById('settings-cancel');
-    const settingsError = document.getElementById('settings-error');
-
-    // 1. Play/Pause Button Listener (Inside Circle)
-    if (playPauseButton) {
-        playPauseButton.addEventListener('click', () => {
-            if (!currentTimerInterval) {
-                startTimer();
-            } else {
-                pauseTimer();
-            }
-        });
+function handleSessionComplete() {
+    let next;
+    if (currentSession === 'focus') {
+        completedPomodoros++;
+        updateDots(dotContainer, completedPomodoros);
+        next = (completedPomodoros % appSettings.pomodorosUntilLongBreak === 0) ? 'longBreak' : 'shortBreak';
+    } else {
+        if (currentSession === 'longBreak' && completedPomodoros >= appSettings.dailyGoal) {
+            completedPomodoros = 0;
+            updateDots(dotContainer, 0);
+        }
+        next = 'focus';
     }
+    applySession(next);
 
-    // 2. Session Cycling Listener (Clicking the label below dots)
-    if (sessionLabel) {
-        sessionLabel.addEventListener('click', cycleSession);
-    }
-
-
-    // 3. Settings Panel Wiring (Hamburger Menu Button)
-    if (menuButton && settingsPanel) {
-        menuButton.addEventListener('click', () => {
-            settingsPanel.classList.toggle('hidden');
-        });
-    }
-
-    // Initialize panel values on open
-    const initializeSettings = () => {
-        document.getElementById('setting-focus').value = durations.focus;
-        document.getElementById('setting-short').value = durations.short;
-        document.getElementById('setting-long').value = durations.long;
-        settingsError.classList.add('hidden');
-    };
-
-    // Settings Save/Cancel Listeners (These remain the same)
-    if (settingsCancel) {
-        settingsCancel.addEventListener('click', () => {
-            settingsPanel.classList.add('hidden');
-        });
-    }
-
-    if (settingsSave) {
-        settingsSave.addEventListener('click', () => {
-            const result = saveDurations({
-                focus: document.getElementById('setting-focus').value,
-                short: document.getElementById('setting-short').value,
-                long:  document.getElementById('setting-long').value,
-            });
-            if (!result.valid) {
-                settingsError.textContent = 'All values must be between 1 and 60.';
-                settingsError.classList.remove('hidden');
-                return;
-            }
-            // Update local durations state
-            durations = { focus: result.focus, short: result.short, long: result.long };
-            settingsPanel.classList.add('hidden');
-        });
-    }
-
-    // Initial setup call (Updated to use saved/default durations)
-    const saved = loadDurations();
-    if (saved && saved.focus && saved.short && saved.long) {
-        durations = { focus: saved.focus, short: saved.short, long: saved.long };
-    }
-
-    // Set initial session state and duration
-    cycleSession(); 
+    const shouldAutostart = (next !== 'focus' && appSettings.autostartBreaks) ||
+                            (next === 'focus' && appSettings.autostartPomodoros);
+    if (shouldAutostart) startTimer();
+    else setIdleState();
 }
 
-setupEventListeners();
+// --- UI state ---
+function setIdleState() {
+    timeCircle.classList.remove('running', 'paused');
+    playButton.innerHTML = '&#9654;';
+    playButton.setAttribute('aria-label', 'Play');
+    resetButton.classList.add('invisible');
+    idleLabel.classList.remove('invisible');
+    runningDisplay.classList.add('invisible');
+}
+
+function setActiveState(isPlaying) {
+    if (isPlaying) {
+        timeCircle.classList.add('running');
+        timeCircle.classList.remove('paused');
+    } else {
+        timeCircle.classList.add('paused');
+        timeCircle.classList.remove('running');
+        playButton.innerHTML = '&#9208;';
+        playButton.setAttribute('aria-label', 'Resume');
+    }
+    resetButton.classList.remove('invisible');
+    idleLabel.classList.add('invisible');
+    runningDisplay.classList.remove('invisible');
+}
+
+// --- Timer controls ---
+function startTimer() {
+    if (animFrameId || remainingSeconds <= 0) return;
+    setActiveState(true);
+
+    runStartTime = performance.now();
+    runStartRemaining = remainingSeconds;
+    let lastShownSecond = Math.ceil(remainingSeconds);
+    const runningTimeEl = document.getElementById('running-time');
+
+    function frame(now) {
+        const elapsed = (now - runStartTime) / 1000;
+        const current = Math.max(0, runStartRemaining - elapsed);
+
+        drawSweep(canvas, current, totalSeconds, appSettings.color);
+
+        const shownSecond = Math.ceil(current);
+        if (shownSecond !== lastShownSecond) {
+            lastShownSecond = shownSecond;
+            runningTimeEl.textContent = formatTime(shownSecond);
+        }
+
+        if (current > 0) {
+            animFrameId = requestAnimationFrame(frame);
+        } else {
+            animFrameId = null;
+            runningTimeEl.textContent = formatTime(0);
+            playFeedback({ sound: appSettings.sound, vibrate: appSettings.vibrate });
+            handleSessionComplete();
+        }
+    }
+
+    animFrameId = requestAnimationFrame(frame);
+}
+
+function pauseTimer() {
+    if (!animFrameId) return;
+    cancelAnimationFrame(animFrameId);
+    animFrameId = null;
+    const elapsed = (performance.now() - runStartTime) / 1000;
+    remainingSeconds = Math.max(0, runStartRemaining - elapsed);
+    setActiveState(false);
+}
+
+function resetTimer() {
+    if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
+    applySession(currentSession);
+    setIdleState();
+}
+
+// --- Init ---
+function setup() {
+    appSettings = loadSettings();
+    durations = loadDurations();
+
+    canvas = document.getElementById('sweep-canvas');
+    clockFaceEl = document.querySelector('.clock-face');
+    timeCircle = document.getElementById('time-circle');
+    dotContainer = document.querySelector('.dot-selectors');
+    idleLabel = document.getElementById('idle-label');
+    runningDisplay = document.getElementById('running-display');
+    resetButton = document.getElementById('reset-button');
+    playButton = document.getElementById('play-button');
+
+    applyTheme(appSettings.color);
+
+    requestAnimationFrame(() => {
+        resizeCanvas(canvas, timeCircle);
+        renderDots(dotContainer, appSettings.dailyGoal, appSettings.pomodorosUntilLongBreak);
+        applySession('focus');
+        setIdleState();
+    });
+
+    // Timer interactions
+    timeCircle.addEventListener('click', () => {
+        if (animFrameId) pauseTimer(); else startTimer();
+    });
+    idleLabel.addEventListener('click', cycleSession);
+    resetButton.addEventListener('click', resetTimer);
+
+    // Settings page
+    document.getElementById('menu-button').addEventListener('click', openSettings);
+    initSettingsPage({
+        getDurations: () => durations,
+        getSettings: () => appSettings,
+        onColorChange: color => {
+            appSettings.color = color;
+            saveSettings(appSettings);
+            applyTheme(color);
+            redrawCanvas();
+        },
+        onSoundChange: sound => {
+            appSettings.sound = sound;
+            saveSettings(appSettings);
+        },
+        onDurationChange: (key, value) => {
+            durations[key] = value;
+            saveDurations(durations);
+            if (!animFrameId) applySession(currentSession);
+        },
+        onPrefChange: (key, value) => {
+            appSettings[key] = value;
+            saveSettings(appSettings);
+            if (key === 'pomodorosUntilLongBreak' || key === 'dailyGoal') {
+                renderDots(dotContainer, appSettings.dailyGoal, appSettings.pomodorosUntilLongBreak);
+                updateDots(dotContainer, completedPomodoros);
+            }
+        },
+    });
+
+    window.addEventListener('resize', () => {
+        resizeCanvas(canvas, timeCircle);
+        redrawCanvas();
+        generateTicks(clockFaceEl, durations[SESSION_CONFIG[currentSession].key]);
+    });
+}
+
+setup();

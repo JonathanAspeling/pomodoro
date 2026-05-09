@@ -12,35 +12,118 @@
   </nav>
 
   <main class="timer-stage">
-    <div class="tick-ring" id="tick-ring"></div>
     <div class="clock-face">
       <div class="outer-ring">
         <div id="time-circle" class="inner-circle">
+          <canvas id="sweep-canvas" class="sweep-canvas"></canvas>
           <button id="play-button" class="play-button" aria-label="Play">&#9654;</button>
         </div>
       </div>
     </div>
-    <div class="dot-selectors">
-      <div class="dots dot-group" data-count="4">
-        <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+
+    <div class="dot-selectors"></div>
+
+    <div class="session-info-area">
+      <div id="idle-label" class="session-label">
+        <span id="session-type">POMODORO</span>&nbsp;<span id="session-duration">25 MIN</span>
       </div>
-      <div class="dots dot-group" data-count="4">
-        <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      <div id="running-display" class="running-display invisible">
+        <p id="running-session-name" class="running-session-name">POMODORO</p>
+        <p id="running-time" class="running-time">25:00</p>
       </div>
     </div>
-    <p class="session-label"><span id="session-type">POMODORO</span> <span id="session-duration">25 MIN</span></p>
+
+    <button id="reset-button" class="reset-button invisible">Reset</button>
   </main>
 
-  <div id="settings-panel" class="settings-panel hidden">
-    <h3>Customize Durations (minutes)</h3>
-    <label>Focus: <input id="setting-focus" type="number" min="1" max="60" value="25"></label>
-    <label>Short Break: <input id="setting-short" type="number" min="1" max="60" value="5"></label>
-    <label>Long Break: <input id="setting-long" type="number" min="1" max="60" value="15"></label>
-    <div class="settings-actions">
-      <button id="settings-save">Save</button>
-      <button id="settings-cancel">Cancel</button>
+  <div id="settings-page" class="settings-page hidden">
+    <div class="settings-header">
+      <button id="settings-back" class="settings-back">&#8249;</button>
     </div>
-    <p id="settings-error" class="settings-error hidden"></p>
+    <div class="settings-content">
+
+      <section class="settings-section">
+        <h4 class="settings-section-title">DURATIONS</h4>
+        <div class="duration-tiles">
+          <div class="duration-tile" data-key="focus">
+            <span class="duration-value" id="tile-focus">25</span>
+            <span class="duration-label">POMODORO</span>
+          </div>
+          <div class="duration-tile" data-key="short">
+            <span class="duration-value" id="tile-short">5</span>
+            <span class="duration-label">BREAK</span>
+          </div>
+          <div class="duration-tile" data-key="long">
+            <span class="duration-value" id="tile-long">15</span>
+            <span class="duration-label">LONG BREAK</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="settings-section">
+        <h4 class="settings-section-title">COLOR THEMES</h4>
+        <div class="color-grid" id="color-grid"></div>
+      </section>
+
+      <section class="settings-section">
+        <h4 class="settings-section-title">SOUND THEMES</h4>
+        <div class="sound-tiles">
+          <div class="sound-tile" data-sound="notification">
+            <div class="sound-icon-circle" id="snd-notification-icon">&#10005;</div>
+            <span class="sound-label">NOTIFICATION SOUND</span>
+          </div>
+          <div class="sound-tile" data-sound="alarm">
+            <div class="sound-icon-circle" id="snd-alarm-icon">&#10003;</div>
+            <span class="sound-label">ALARM SOUND</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="settings-section">
+        <h4 class="settings-section-title">OTHER PREFERENCES</h4>
+        <div class="pref-number-tiles">
+          <div class="pref-number-tile" data-pref="pomodorosUntilLongBreak" data-min="1" data-max="12">
+            <span class="pref-number-value" id="pref-pomodorosUntilLongBreak">4</span>
+            <span class="pref-number-label">POMODOROS UNTIL<br>LONG BREAK</span>
+          </div>
+          <div class="pref-number-tile" data-pref="dailyGoal" data-min="1" data-max="24">
+            <span class="pref-number-value" id="pref-dailyGoal">8</span>
+            <span class="pref-number-label">DAILY GOAL</span>
+          </div>
+        </div>
+        <div class="toggle-tiles">
+          <div class="toggle-tile" data-pref="vibrate">
+            <div class="toggle-opts">
+              <button class="toggle-opt toggle-yes">&#10003;</button>
+              <button class="toggle-opt toggle-no">&#10005;</button>
+            </div>
+            <span class="toggle-label">VIBRATE</span>
+          </div>
+          <div class="toggle-tile" data-pref="autostartBreaks">
+            <div class="toggle-opts">
+              <button class="toggle-opt toggle-yes">&#10003;</button>
+              <button class="toggle-opt toggle-no">&#10005;</button>
+            </div>
+            <span class="toggle-label">AUTOSTART BREAKS</span>
+          </div>
+          <div class="toggle-tile" data-pref="autostartPomodoros">
+            <div class="toggle-opts">
+              <button class="toggle-opt toggle-yes">&#10003;</button>
+              <button class="toggle-opt toggle-no">&#10005;</button>
+            </div>
+            <span class="toggle-label">AUTOSTART POMODOROS</span>
+          </div>
+          <div class="toggle-tile" data-pref="showNotification">
+            <div class="toggle-opts">
+              <button class="toggle-opt toggle-yes">&#10003;</button>
+              <button class="toggle-opt toggle-no">&#10005;</button>
+            </div>
+            <span class="toggle-label">SHOW NOTIFICATION</span>
+          </div>
+        </div>
+      </section>
+
+    </div>
   </div>
 
   <script type="module" src="js/main.js"></script>
