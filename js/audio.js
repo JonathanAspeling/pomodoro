@@ -1,7 +1,4 @@
-export function playFeedback({ sound, vibrate }) {
-    if (vibrate && navigator.vibrate) {
-        try { navigator.vibrate(200); } catch {}
-    }
+export function playFeedback({ sound }) {
     if (sound === 'none') return;
     try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();

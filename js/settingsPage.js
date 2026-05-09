@@ -1,4 +1,5 @@
 import { COLOR_THEMES } from './constants.js';
+import { requestNotificationPermission } from './notifications.js';
 
 let cb = null;
 
@@ -40,7 +41,7 @@ export function initSettingsPage(callbacks) {
     });
 
     document.querySelectorAll('.toggle-tile').forEach(tile => {
-        tile.addEventListener('click', e => {
+        tile.addEventListener('click', async e => {
             const pref = tile.dataset.pref;
             const yesBtn = tile.querySelector('.toggle-yes');
             const noBtn = tile.querySelector('.toggle-no');
@@ -49,6 +50,12 @@ export function initSettingsPage(callbacks) {
             if (yesBtn.contains(e.target)) next = true;
             else if (noBtn.contains(e.target)) next = false;
             else next = !current;
+
+            if (pref === 'showNotification' && next === true) {
+                const result = await requestNotificationPermission();
+                if (result !== 'granted') next = false;
+            }
+
             cb.onPrefChange(pref, next);
             yesBtn.classList.toggle('active', next === true);
             noBtn.classList.toggle('active', next !== true);

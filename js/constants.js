@@ -22,7 +22,6 @@ export const DEFAULT_SETTINGS = {
     sound: 'alarm',
     pomodorosUntilLongBreak: 4,
     dailyGoal: 8,
-    vibrate: false,
     autostartBreaks: false,
     autostartPomodoros: false,
     showNotification: false,

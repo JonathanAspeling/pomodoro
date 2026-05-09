@@ -3,6 +3,7 @@ import { SESSION_ORDER, SESSION_CONFIG, DEFAULT_SETTINGS } from './constants.js'
 import { resizeCanvas, drawSweep, generateTicks } from './clockFace.js';
 import { renderDots, updateDots } from './dots.js';
 import { playFeedback } from './audio.js';
+import { showNotification } from './notifications.js';
 import { initSettingsPage, openSettings } from './settingsPage.js';
 
 // --- State ---
@@ -13,6 +14,7 @@ let completedPomodoros = 0;
 
 // Timer state
 let animFrameId = null;
+let completionTimeoutId = null;
 let runStartTime = null;
 let runStartRemaining = 0;
 let remainingSeconds = 0;
@@ -58,6 +60,7 @@ function cycleSession() {
 }
 
 function handleSessionComplete() {
+    const finished = currentSession;
     let next;
     if (currentSession === 'focus') {
         completedPomodoros++;
@@ -71,6 +74,13 @@ function handleSessionComplete() {
         next = 'focus';
     }
     applySession(next);
+
+    if (appSettings.showNotification) {
+        showNotification(
+            `${SESSION_CONFIG[finished].label} complete`,
+            `Up next: ${SESSION_CONFIG[next].label}`
+        );
+    }
 
     const shouldAutostart = (next !== 'focus' && appSettings.autostartBreaks) ||
                             (next === 'focus' && appSettings.autostartPomodoros);
@@ -113,6 +123,16 @@ function startTimer() {
     let lastShownSecond = Math.ceil(remainingSeconds);
     const runningTimeEl = document.getElementById('running-time');
 
+    completionTimeoutId = setTimeout(() => {
+        completionTimeoutId = null;
+        if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
+        remainingSeconds = 0;
+        runningTimeEl.textContent = formatTime(0);
+        drawSweep(canvas, 0, totalSeconds, appSettings.color);
+        playFeedback({ sound: appSettings.sound });
+        handleSessionComplete();
+    }, remainingSeconds * 1000);
+
     function frame(now) {
         const elapsed = (now - runStartTime) / 1000;
         const current = Math.max(0, runStartRemaining - elapsed);
@@ -129,9 +149,6 @@ function startTimer() {
             animFrameId = requestAnimationFrame(frame);
         } else {
             animFrameId = null;
-            runningTimeEl.textContent = formatTime(0);
-            playFeedback({ sound: appSettings.sound, vibrate: appSettings.vibrate });
-            handleSessionComplete();
         }
     }
 
@@ -139,9 +156,9 @@ function startTimer() {
 }
 
 function pauseTimer() {
-    if (!animFrameId) return;
-    cancelAnimationFrame(animFrameId);
-    animFrameId = null;
+    if (!animFrameId && !completionTimeoutId) return;
+    if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
+    if (completionTimeoutId) { clearTimeout(completionTimeoutId); completionTimeoutId = null; }
     const elapsed = (performance.now() - runStartTime) / 1000;
     remainingSeconds = Math.max(0, runStartRemaining - elapsed);
     setActiveState(false);
@@ -149,6 +166,7 @@ function pauseTimer() {
 
 function resetTimer() {
     if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
+    if (completionTimeoutId) { clearTimeout(completionTimeoutId); completionTimeoutId = null; }
     applySession(currentSession);
     setIdleState();
 }
@@ -178,7 +196,7 @@ function setup() {
 
     // Timer interactions
     timeCircle.addEventListener('click', () => {
-        if (animFrameId) pauseTimer(); else startTimer();
+        if (animFrameId || completionTimeoutId) pauseTimer(); else startTimer();
     });
     idleLabel.addEventListener('click', cycleSession);
     resetButton.addEventListener('click', resetTimer);
