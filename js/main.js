@@ -11,8 +11,89 @@ let durations = { focus: 25, short: 5, long: 15 }; // Default durations in minut
 
 // --- Placeholder Functions (Assuming these exist and work as intended) ---
 function updateTimerDisplay() { /* ... implementation for updating the clock face ... */ }
-function startTimer() { /* ... implementation to start the countdown interval ... */ }
+
+/**
+ * Plays a simple beep sound using the Web Audio API.
+ */
+function playBeep() {
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.value = 880;
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.6);
+    } catch (e) { /* audio not available */ }
+}
+
+/**
+ * Displays a temporary status message toast on the screen.
+ * @param {string} message - The message to display.
+ */
+function showToast(message) {
+    let toast = document.getElementById('status-toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'status-toast';
+        toast.style.cssText = [
+            'position:fixed', 'bottom:30px', 'left:50%',
+            'transform:translateX(-50%)', 'background:#333',
+            'color:white', 'padding:10px 22px', 'border-radius:20px',
+            'font-size:0.95em', 'opacity:0',
+            'transition:opacity 0.3s', 'pointer-events:none', 'z-index:200'
+        ].join(';');
+        document.body.appendChild(toast);
+    }
+    toast.textContent = message;
+    toast.style.opacity = '1';
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => { toast.style.opacity = '0'; }, 3000);
+}
+
+
+/**
+ * Starts the timer countdown interval.
+ */
+function startTimer() {
+    if (currentTimerInterval) return;
+
+    elapsedTimeSeconds = totalDurationSeconds; // Start from full duration
+    updateTimerDisplay();
+    resetTimeCircleAnimation();
+
+    currentTimerInterval = setInterval(() => {
+        elapsedTimeSeconds--;
+        updateTimerDisplay();
+
+        // Check for timer end condition
+        if (elapsedTimeSeconds < 0) {
+            clearInterval(currentTimerInterval);
+            currentTimerInterval = null;
+            
+            // --- TASK IMPLEMENTATION START ---
+            playBeep();
+            showToast('Session complete! Starting next...');
+            // In a real app, you would also trigger the state transition here.
+            // Example: handleTimeEnd(currentState); 
+            // --- TASK IMPLEMENTATION END ---
+
+        } else {
+            updateTimeCircleAnimation(elapsedTimeSeconds);
+        }
+    }, 1000);
+}
+
+
 function pauseTimer() { /* ... implementation to stop the timer ... */ }
+
+/**
+ * Sets a new session duration and resets the timer state.
+ * @param {number} durationSeconds - The total duration for the new session.
+ */
 function setSession(durationSeconds) { 
     totalDurationSeconds = durationSeconds;
     elapsedTimeSeconds = 0;
