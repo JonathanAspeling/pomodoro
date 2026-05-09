@@ -22,10 +22,10 @@ No build tooling. Either:
 open index.html
 
 # Or serve with any static server (recommended for ES modules)
-python -m http.server 8000
+npx live-server
 ```
 
-Then visit `http://localhost:8000`.
+`live-server` opens a browser tab automatically.
 
 ## Project structure
 
