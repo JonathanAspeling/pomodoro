@@ -10,6 +10,7 @@ body {
     margin: 0;
     background-color: #C8973A; /* Rich golden/amber background color */
     color: #333;
+    position: relative; /* Ensures absolute positioning context is the viewport/body itself */
 }
 
 /* Main container styling - Removed white card look */
@@ -39,25 +40,25 @@ body {
 }
 
 .play-button {
-    padding: 10px 25px;
+    padding: 10px; /* Adjusted padding to frame the icon better */
     font-size: 1em;
     cursor: pointer;
     background-color: transparent; /* Transparent background */
     color: #C8973A; /* Match the amber background color for integration */
     border: none;
-    border-radius: 50px; /* Pill shape for modern look */
+    /* Removed border-radius and box-shadow to make it look like a bare icon */
     transition: all 0.2s;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .play-button:hover {
-    background-color: rgba(200, 151, 58, 0.1); /* Subtle hover effect */
+    opacity: 0.8; /* Subtle hover effect by changing opacity instead of background color */
 }
 
 /* Clock Face (AC 2) */
 .clock-face {
-    width: 300px;
-    height: 300px;
+    width: 75vw; /* Responsive width based on viewport size */
+    height: 75vw; /* Maintains aspect ratio */
+    max-width: 500px; /* Caps the size on very large screens */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -73,30 +74,30 @@ body {
     background-color: transparent; /* Transparent background */
     border: 8px solid #C8973A; /* Visible border ring using the amber color */
     box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.1);
-    position: relative;
+    position: relative; /* Needed for absolute positioning of markers */
 }
 
-/* Tick Marks (Minute Markers) - Using pseudo-elements for simplicity/concept */
-.outer-ring::before {
-    content: '';
+/* Tick Marks (Minute Markers) - New styling for generated elements */
+.tick-marker {
     position: absolute;
     top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    /* We will simulate ticks using radial gradients or complex positioning, but for pure CSS structure update, we'll rely on the border and add a conceptual marker layer */
+    left: 50%; /* Will be adjusted by JS to position correctly */
+    transform: translate(-50%, 0); /* Center horizontally, start at top edge */
+    width: 2px; /* Thickness of the tick line */
+    height: 10px; /* Length of the visible marker */
+    background-color: white; /* White color for visibility */
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.2); /* Subtle shadow effect */
 }
 
 /* Inner Circle Styling (Timer Display Area) */
 .inner-circle {
-    width: 100%;
-    height: 100%;
+    width: calc(100% - 20px); /* Reduced size to create bezel gap */
+    height: calc(100% - 20px); /* Reduced size to create bezel gap */
     border-radius: 50%;
     background-color: white; /* Keeping the display area white for contrast */
     position: absolute;
-    top: 0;
-    left: 0;
+    top: 10px; /* Offset by half the reduction amount (10px) */
+    left: 10px; /* Offset by half the reduction amount (10px) */
     transition: transform 0.3s ease-out;
     transform: scale(1);
     display: flex;
@@ -118,14 +119,14 @@ body {
 /* Dot Selectors (AC 3) */
 .dot-selectors {
     display: flex;
-    justify-content: space-around;
+    justify-content: center; /* Changed to center for better overall centering of the row */
     width: 100%;
     margin-bottom: 40px;
 }
 
 .dots {
     display: flex;
-    flex-direction: column;
+    flex-direction: row; /* Changed from column to row */
     gap: 8px; /* Space between dots */
 }
 
