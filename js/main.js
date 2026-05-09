@@ -1,7 +1,7 @@
 // This file should contain the main entry point for the application logic, 
 // initializing event listeners and setting up the initial state of the Pomodoro timer.
 
-import { setupEventListeners } from './eventListeners.js'; // Placeholder for any global listeners
+import { calculateScaleFactor, updateTimeCircleAnimation, resetTimeCircleAnimation } from '../src/js/animationUtils.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log("Pomodoro App: DOM Content Loaded. Initializing workflow engine.");
