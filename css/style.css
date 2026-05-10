@@ -399,18 +399,17 @@ input.num-edit::-webkit-outer-spin-button { -webkit-appearance: none; }
 
 .swatch-check {
     display: none;
+    position: absolute;
+    inset: 0;
     align-items: center;
     justify-content: center;
     font-size: 1.4em;
     color: white;
     pointer-events: none;
     line-height: 1;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
 }
 
-.color-swatch.selected {
-    background: var(--bg-color, #C8973A);
-}
-.color-swatch.selected .swatch-dot { display: none; }
 .color-swatch.selected .swatch-check { display: flex; }
 
 /* --- Sound Tiles --- */
