@@ -61,6 +61,10 @@ body {
     left: calc(50% - 1.5px);
     top: -16px;
     pointer-events: none;
+    transition: opacity 0.4s ease;
+}
+.tick.tick-hidden {
+    opacity: 0;
 }
 
 /* === Outer Ring === */

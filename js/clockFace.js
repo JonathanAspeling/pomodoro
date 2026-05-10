@@ -44,3 +44,18 @@ export function generateTicks(clockFaceEl, count) {
         clockFaceEl.appendChild(tick);
     }
 }
+
+// Tick i sits at angle i*(360/n) clockwise from 12. The remaining wedge
+// covers [0, fraction*360) clockwise from 12, so ticks past that angle
+// are in the elapsed region and get hidden.
+export function updateTickVisibility(clockFaceEl, remaining, total) {
+    if (!clockFaceEl) return;
+    const ticks = clockFaceEl.querySelectorAll('.tick');
+    const n = ticks.length;
+    if (!n) return;
+    const fraction = total > 0 ? Math.max(0, Math.min(1, remaining / total)) : 0;
+    const visibleCount = remaining <= 0 ? 0 : Math.ceil(fraction * n);
+    ticks.forEach((tick, i) => {
+        tick.classList.toggle('tick-hidden', i >= visibleCount);
+    });
+}

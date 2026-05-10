@@ -1,6 +1,6 @@
 import { loadDurations, saveDurations, loadSettings, saveSettings } from './storageManager.js';
 import { SESSION_ORDER, SESSION_CONFIG, DEFAULT_SETTINGS } from './constants.js';
-import { resizeCanvas, drawSweep, generateTicks } from './clockFace.js';
+import { resizeCanvas, drawSweep, generateTicks, updateTickVisibility } from './clockFace.js';
 import { renderDots, updateDots } from './dots.js';
 import { playFeedback } from './audio.js';
 import { showNotification } from './notifications.js';
@@ -34,8 +34,10 @@ function applyTheme(color) {
 
 function redrawCanvas() {
     if (timeCircle.classList.contains('running')) return; // rAF will redraw
-    const remaining = timeCircle.classList.contains('paused') ? remainingSeconds : 0;
+    const paused = timeCircle.classList.contains('paused');
+    const remaining = paused ? remainingSeconds : 0;
     drawSweep(canvas, remaining, totalSeconds, appSettings.color);
+    updateTickVisibility(clockFaceEl, paused ? remainingSeconds : totalSeconds, totalSeconds);
 }
 
 // --- Session management ---
@@ -51,6 +53,7 @@ function applySession(type) {
     document.getElementById('running-time').textContent = formatTime(remainingSeconds);
     drawSweep(canvas, 0, totalSeconds, appSettings.color);
     generateTicks(clockFaceEl, durations[cfg.key]);
+    updateTickVisibility(clockFaceEl, totalSeconds, totalSeconds);
 }
 
 function cycleSession() {
@@ -138,6 +141,7 @@ function startTimer() {
         const current = Math.max(0, runStartRemaining - elapsed);
 
         drawSweep(canvas, current, totalSeconds, appSettings.color);
+        updateTickVisibility(clockFaceEl, current, totalSeconds);
 
         const shownSecond = Math.ceil(current);
         if (shownSecond !== lastShownSecond) {
