@@ -199,7 +199,9 @@ body {
     text-transform: uppercase;
     cursor: pointer;
     user-select: none;
-    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
 }
 
 #session-type { font-weight: bold; opacity: 0.9; }
@@ -207,6 +209,52 @@ body {
 
 .session-label:hover #session-type,
 .session-label:hover #session-duration { opacity: 1; }
+
+@keyframes mode-out-down {
+    to { opacity: 0; transform: translateY(10px); }
+}
+@keyframes mode-in-down {
+    from { opacity: 0; transform: translateY(-10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes mode-out-up {
+    to { opacity: 0; transform: translateY(-10px); }
+}
+@keyframes mode-in-up {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.mode-text.mode-anim-out-down { animation: mode-out-down 0.18s ease forwards; }
+.mode-text.mode-anim-in-down  { animation: mode-in-down  0.22s ease; }
+.mode-text.mode-anim-out-up   { animation: mode-out-up   0.18s ease forwards; }
+.mode-text.mode-anim-in-up    { animation: mode-in-up    0.22s ease; }
+
+.mode-text {
+    display: inline-block;
+    min-width: 13em;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.mode-stepper {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    line-height: 0;
+}
+
+.mode-step {
+    background: none;
+    border: none;
+    color: white;
+    opacity: 0.6;
+    padding: 1px 4px;
+    cursor: pointer;
+    line-height: 0;
+    transition: opacity 0.15s;
+}
+.mode-step:hover { opacity: 1; }
+.mode-step svg { display: block; }
 
 /* === Running Display === */
 .running-display {

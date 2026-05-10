@@ -56,10 +56,30 @@ function applySession(type) {
     updateTickVisibility(clockFaceEl, totalSeconds, totalSeconds);
 }
 
-function cycleSession() {
-    if (animFrameId) return;
-    const next = (SESSION_ORDER.indexOf(currentSession) + 1) % SESSION_ORDER.length;
-    applySession(SESSION_ORDER[next]);
+const MODE_ANIM_CLASSES = ['mode-anim-out-down', 'mode-anim-in-down', 'mode-anim-out-up', 'mode-anim-in-up'];
+let modeFadingId = null;
+function cycleSession(direction = 1) {
+    if (animFrameId || completionTimeoutId) return;
+    const len = SESSION_ORDER.length;
+    const next = SESSION_ORDER[(SESSION_ORDER.indexOf(currentSession) + direction + len) % len];
+    const modeText = idleLabel.querySelector('.mode-text');
+    if (!modeText) { applySession(next); return; }
+    if (modeFadingId) { clearTimeout(modeFadingId); modeFadingId = null; }
+
+    const outClass = direction > 0 ? 'mode-anim-out-down' : 'mode-anim-out-up';
+    const inClass = direction > 0 ? 'mode-anim-in-down' : 'mode-anim-in-up';
+
+    modeText.classList.remove(...MODE_ANIM_CLASSES);
+    void modeText.offsetWidth; // restart animation if mid-flight
+    modeText.classList.add(outClass);
+
+    modeFadingId = setTimeout(() => {
+        modeText.classList.remove(outClass);
+        applySession(next);
+        void modeText.offsetWidth;
+        modeText.classList.add(inClass);
+        modeFadingId = null;
+    }, 180);
 }
 
 function handleSessionComplete() {
@@ -206,7 +226,18 @@ function setup() {
     timeCircle.addEventListener('click', () => {
         if (animFrameId || completionTimeoutId) pauseTimer(); else startTimer();
     });
-    idleLabel.addEventListener('click', cycleSession);
+    idleLabel.addEventListener('click', e => {
+        if (e.target.closest('.mode-stepper')) return;
+        cycleSession(1);
+    });
+    document.getElementById('mode-prev').addEventListener('click', e => {
+        e.stopPropagation();
+        cycleSession(-1);
+    });
+    document.getElementById('mode-next').addEventListener('click', e => {
+        e.stopPropagation();
+        cycleSession(1);
+    });
     resetButton.addEventListener('click', resetTimer);
 
     // Settings page

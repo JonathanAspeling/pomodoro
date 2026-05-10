@@ -34,7 +34,15 @@
 
     <div class="session-info-area">
       <div id="idle-label" class="session-label">
-        <span id="session-type">POMODORO</span>&nbsp;<span id="session-duration">25 MIN</span>
+        <div class="mode-stepper" aria-label="Change mode">
+          <button class="mode-step" id="mode-prev" aria-label="Previous mode">
+            <svg viewBox="0 0 14 8" width="12" height="6" aria-hidden="true"><path d="M1 7 L7 1 L13 7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <button class="mode-step" id="mode-next" aria-label="Next mode">
+            <svg viewBox="0 0 14 8" width="12" height="6" aria-hidden="true"><path d="M1 1 L7 7 L13 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+        <span class="mode-text"><span id="session-type">POMODORO</span>&nbsp;<span id="session-duration">25 MIN</span></span>
       </div>
       <div id="running-display" class="running-display invisible">
         <p id="running-session-name" class="running-session-name">POMODORO</p>
