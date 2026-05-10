@@ -2,7 +2,7 @@ import { loadDurations, saveDurations, loadSettings, saveSettings } from './stor
 import { SESSION_ORDER, SESSION_CONFIG, DEFAULT_SETTINGS } from './constants.js';
 import { resizeCanvas, drawSweep, generateTicks, updateTickVisibility } from './clockFace.js';
 import { renderDots, updateDots } from './dots.js';
-import { playFeedback } from './audio.js';
+import { playFeedback, playTicking, stopTicking } from './audio.js';
 import { showNotification } from './notifications.js';
 import { initSettingsPage, openSettings } from './settingsPage.js';
 
@@ -120,6 +120,7 @@ function setActiveState(isPlaying) {
 function startTimer() {
     if (animFrameId || remainingSeconds <= 0) return;
     setActiveState(true);
+    if (appSettings.tickingSound) playTicking();
 
     runStartTime = performance.now();
     runStartRemaining = remainingSeconds;
@@ -132,6 +133,7 @@ function startTimer() {
         remainingSeconds = 0;
         runningTimeEl.textContent = formatTime(0);
         drawSweep(canvas, 0, totalSeconds, appSettings.color);
+        stopTicking();
         playFeedback({ sound: appSettings.sound });
         handleSessionComplete();
     }, remainingSeconds * 1000);
@@ -165,12 +167,14 @@ function pauseTimer() {
     if (completionTimeoutId) { clearTimeout(completionTimeoutId); completionTimeoutId = null; }
     const elapsed = (performance.now() - runStartTime) / 1000;
     remainingSeconds = Math.max(0, runStartRemaining - elapsed);
+    stopTicking();
     setActiveState(false);
 }
 
 function resetTimer() {
     if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
     if (completionTimeoutId) { clearTimeout(completionTimeoutId); completionTimeoutId = null; }
+    stopTicking();
     applySession(currentSession);
     setIdleState();
 }
@@ -231,6 +235,10 @@ function setup() {
             if (key === 'pomodorosUntilLongBreak' || key === 'dailyGoal') {
                 renderDots(dotContainer, appSettings.dailyGoal, appSettings.pomodorosUntilLongBreak);
                 updateDots(dotContainer, completedPomodoros);
+            }
+            if (key === 'tickingSound') {
+                if (value && animFrameId) playTicking();
+                else stopTicking();
             }
         },
     });

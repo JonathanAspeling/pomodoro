@@ -25,4 +25,5 @@ export const DEFAULT_SETTINGS = {
     autostartBreaks: false,
     autostartPomodoros: false,
     showNotification: false,
+    tickingSound: false,
 };
