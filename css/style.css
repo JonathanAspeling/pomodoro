@@ -347,40 +347,47 @@ input.num-edit::-webkit-outer-spin-button { -webkit-appearance: none; }
 .color-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    gap: 8px;
-    background: white;
-    border-radius: 10px;
-    padding: 12px;
+    gap: 10px;
+    background: transparent;
+    padding: 0;
 }
 
 .color-swatch {
     aspect-ratio: 1;
-    border-radius: 8px;
+    background: white;
+    border-radius: 12px;
     cursor: pointer;
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform 0.1s;
+    transition: transform 0.1s, background 0.15s;
 }
 .color-swatch:hover { transform: scale(1.06); }
 
-.swatch-check {
-    display: none;
-    width: 36px;
-    height: 36px;
-    background: white;
+.swatch-dot {
+    width: 64%;
+    height: 64%;
     border-radius: 50%;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.1em;
-    color: var(--bg-color, #C8973A);
     pointer-events: none;
+    transition: opacity 0.15s;
 }
 
-.color-swatch.selected .swatch-check {
-    display: flex;
+.swatch-check {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4em;
+    color: white;
+    pointer-events: none;
+    line-height: 1;
 }
+
+.color-swatch.selected {
+    background: var(--bg-color, #C8973A);
+}
+.color-swatch.selected .swatch-dot { display: none; }
+.color-swatch.selected .swatch-check { display: flex; }
 
 /* --- Sound Tiles --- */
 .sound-tiles {

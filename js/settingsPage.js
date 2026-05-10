@@ -110,9 +110,14 @@ function buildColorGrid(currentColor) {
     COLOR_THEMES.forEach(color => {
         const swatch = document.createElement('div');
         swatch.className = 'color-swatch';
-        swatch.style.background = color;
         swatch.dataset.color = color;
         if (color === currentColor) swatch.classList.add('selected');
+
+        const dot = document.createElement('span');
+        dot.className = 'swatch-dot';
+        dot.style.background = color;
+        swatch.appendChild(dot);
+
         const check = document.createElement('span');
         check.className = 'swatch-check';
         check.textContent = '✓';
