@@ -31,6 +31,19 @@ body {
 }
 .menu-button:hover { opacity: 1; }
 
+/* === GitHub Link === */
+.github-link {
+    position: fixed;
+    top: 22px;
+    left: 22px;
+    z-index: 50;
+    color: white;
+    opacity: 0.85;
+    display: inline-flex;
+    transition: opacity 0.2s;
+}
+.github-link:hover { opacity: 1; }
+
 /* === Timer Stage === */
 .timer-stage {
     display: flex;
