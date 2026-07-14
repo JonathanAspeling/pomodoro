@@ -16,6 +16,7 @@ let completedPomodoros = 0;
 // Timer state
 let animFrameId = null;
 let completionTimeoutId = null;
+let displayIntervalId = null;
 let runStartTime = null;
 let runStartRemaining = 0;
 let remainingSeconds = 0;
@@ -153,6 +154,7 @@ function startTimer() {
     completionTimeoutId = setTimeout(() => {
         completionTimeoutId = null;
         if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
+        if (displayIntervalId) { clearInterval(displayIntervalId); displayIntervalId = null; }
         remainingSeconds = 0;
         runningTimeEl.textContent = formatTime(0);
         drawSweep(canvas, 0, totalSeconds, appSettings.color);
@@ -160,6 +162,16 @@ function startTimer() {
         playFeedback({ sound: appSettings.sound });
         handleSessionComplete();
     }, remainingSeconds * 1000);
+
+    if (displayIntervalId) { clearInterval(displayIntervalId); displayIntervalId = null; }
+    displayIntervalId = setInterval(() => {
+        if (!document.hidden) return;
+        const current = Math.max(0, runStartRemaining - (performance.now() - runStartTime) / 1000);
+        const shownSecond = Math.ceil(current);
+        document.title = `${formatTime(shownSecond)} · ${SESSION_CONFIG[currentSession].label}`;
+        updateFavicon(shownSecond, totalSeconds, appSettings.color);
+        document.getElementById('running-time').textContent = formatTime(shownSecond);
+    }, 1000);
 
     function frame(now) {
         const elapsed = (now - runStartTime) / 1000;
@@ -190,6 +202,7 @@ function pauseTimer() {
     if (!animFrameId && !completionTimeoutId) return;
     if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
     if (completionTimeoutId) { clearTimeout(completionTimeoutId); completionTimeoutId = null; }
+    if (displayIntervalId) { clearInterval(displayIntervalId); displayIntervalId = null; }
     const elapsed = (performance.now() - runStartTime) / 1000;
     remainingSeconds = Math.max(0, runStartRemaining - elapsed);
     stopTicking();
@@ -201,6 +214,7 @@ function pauseTimer() {
 function resetTimer() {
     if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
     if (completionTimeoutId) { clearTimeout(completionTimeoutId); completionTimeoutId = null; }
+    if (displayIntervalId) { clearInterval(displayIntervalId); displayIntervalId = null; }
     stopTicking();
     applySession(currentSession);
     setIdleState();
@@ -285,6 +299,17 @@ function setup() {
         resizeCanvas(canvas, timeCircle);
         redrawCanvas();
         generateTicks(clockFaceEl, durations[SESSION_CONFIG[currentSession].key]);
+    });
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden || !completionTimeoutId) return;
+        const current = Math.max(0, runStartRemaining - (performance.now() - runStartTime) / 1000);
+        const shownSecond = Math.ceil(current);
+        document.getElementById('running-time').textContent = formatTime(shownSecond);
+        document.title = `${formatTime(shownSecond)} · ${SESSION_CONFIG[currentSession].label}`;
+        updateFavicon(shownSecond, totalSeconds, appSettings.color);
+        drawSweep(canvas, current, totalSeconds, appSettings.color);
+        updateTickVisibility(clockFaceEl, current, totalSeconds);
     });
 }
 
