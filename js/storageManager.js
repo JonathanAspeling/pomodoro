@@ -49,3 +49,29 @@ export function saveSettings(settings) {
         localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
     } catch {}
 }
+
+const SESSION_STATE_KEY = 'pomodoroSession';
+
+export function saveSessionState({ completedPomodoros, currentSession, remainingSeconds, timerWasActive }) {
+    try {
+        localStorage.setItem(SESSION_STATE_KEY, JSON.stringify({
+            completedPomodoros,
+            currentSession,
+            remainingSeconds,
+            timerWasActive,
+            savedAt: Date.now(),
+        }));
+    } catch {}
+}
+
+export function loadSessionState() {
+    try {
+        const raw = localStorage.getItem(SESSION_STATE_KEY);
+        if (!raw) return null;
+        const s = JSON.parse(raw);
+        if (typeof s.completedPomodoros !== 'number' || !s.currentSession) return null;
+        return s;
+    } catch {
+        return null;
+    }
+}

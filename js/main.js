@@ -1,4 +1,4 @@
-import { loadDurations, saveDurations, loadSettings, saveSettings } from './storageManager.js';
+import { loadDurations, saveDurations, loadSettings, saveSettings, saveSessionState, loadSessionState } from './storageManager.js';
 import { SESSION_ORDER, SESSION_CONFIG, DEFAULT_SETTINGS } from './constants.js';
 import { resizeCanvas, drawSweep, generateTicks, updateTickVisibility } from './clockFace.js';
 import { renderDots, updateDots } from './dots.js';
@@ -28,6 +28,15 @@ let canvas, clockFaceEl, timeCircle, dotContainer, idleLabel, runningDisplay, re
 // --- Formatting ---
 const pad = n => String(n).padStart(2, '0');
 const formatTime = s => `${pad(Math.floor(s / 60))}:${pad(s % 60)}`;
+
+// --- Session persistence ---
+function persistState() {
+    const isActive = !!(animFrameId || completionTimeoutId);
+    const current = isActive
+        ? Math.max(0, runStartRemaining - (performance.now() - runStartTime) / 1000)
+        : remainingSeconds;
+    saveSessionState({ completedPomodoros, currentSession, remainingSeconds: current, timerWasActive: isActive });
+}
 
 // --- Theme & rendering ---
 function applyTheme(color) {
@@ -111,6 +120,7 @@ function handleSessionComplete() {
                             (next === 'focus' && appSettings.autostartPomodoros);
     if (shouldAutostart) startTimer();
     else setIdleState();
+    persistState();
 }
 
 // --- UI state ---
@@ -209,6 +219,7 @@ function pauseTimer() {
     setActiveState(false);
     document.title = `${formatTime(Math.ceil(remainingSeconds))} · ${SESSION_CONFIG[currentSession].label}`;
     updateFavicon(remainingSeconds, totalSeconds, appSettings.color);
+    persistState();
 }
 
 function resetTimer() {
@@ -218,6 +229,7 @@ function resetTimer() {
     stopTicking();
     applySession(currentSession);
     setIdleState();
+    persistState();
 }
 
 // --- Init ---
@@ -239,8 +251,54 @@ function setup() {
     requestAnimationFrame(() => {
         resizeCanvas(canvas, timeCircle);
         renderDots(dotContainer, appSettings.dailyGoal, appSettings.pomodorosUntilLongBreak);
-        applySession('focus');
-        setIdleState();
+
+        const saved = loadSessionState();
+        if (saved) {
+            completedPomodoros = saved.completedPomodoros ?? 0;
+            updateDots(dotContainer, completedPomodoros);
+
+            let restoreSession = saved.currentSession ?? 'focus';
+            let restoreRemaining = saved.remainingSeconds ?? null;
+            let restorePaused = true;
+
+            if (saved.timerWasActive && saved.savedAt && restoreRemaining != null) {
+                const elapsed = (Date.now() - saved.savedAt) / 1000;
+                restoreRemaining = Math.max(0, restoreRemaining - elapsed);
+
+                if (restoreRemaining <= 0) {
+                    // Session completed while the tab was closed — advance to next
+                    if (saved.currentSession === 'focus') {
+                        completedPomodoros++;
+                        updateDots(dotContainer, completedPomodoros);
+                        restoreSession = (completedPomodoros % appSettings.pomodorosUntilLongBreak === 0)
+                            ? 'longBreak' : 'shortBreak';
+                    } else {
+                        if (saved.currentSession === 'longBreak' && completedPomodoros >= appSettings.dailyGoal) {
+                            completedPomodoros = 0;
+                            updateDots(dotContainer, 0);
+                        }
+                        restoreSession = 'focus';
+                    }
+                    restoreRemaining = null;
+                    restorePaused = false;
+                }
+            }
+
+            applySession(restoreSession);
+
+            if (restorePaused && restoreRemaining != null) {
+                remainingSeconds = restoreRemaining;
+                document.getElementById('running-time').textContent = formatTime(Math.ceil(restoreRemaining));
+                drawSweep(canvas, restoreRemaining, totalSeconds, appSettings.color);
+                updateTickVisibility(clockFaceEl, restoreRemaining, totalSeconds);
+                setActiveState(false);
+            } else {
+                setIdleState();
+            }
+        } else {
+            applySession('focus');
+            setIdleState();
+        }
     });
 
     // Timer interactions
@@ -302,7 +360,11 @@ function setup() {
     });
 
     document.addEventListener('visibilitychange', () => {
-        if (document.hidden || !completionTimeoutId) return;
+        if (document.hidden) {
+            persistState();
+            return;
+        }
+        if (!completionTimeoutId) return;
         const current = Math.max(0, runStartRemaining - (performance.now() - runStartTime) / 1000);
         const shownSecond = Math.ceil(current);
         document.getElementById('running-time').textContent = formatTime(shownSecond);
@@ -311,6 +373,8 @@ function setup() {
         drawSweep(canvas, current, totalSeconds, appSettings.color);
         updateTickVisibility(clockFaceEl, current, totalSeconds);
     });
+
+    window.addEventListener('beforeunload', persistState);
 }
 
 setup();
