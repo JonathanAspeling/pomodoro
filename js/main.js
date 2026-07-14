@@ -5,6 +5,7 @@ import { renderDots, updateDots } from './dots.js';
 import { playFeedback, playTicking, stopTicking } from './audio.js';
 import { showNotification } from './notifications.js';
 import { initSettingsPage, openSettings } from './settingsPage.js';
+import { updateFavicon, resetFavicon } from './favicon.js';
 
 // --- State ---
 let durations = { focus: 25, short: 5, long: 15 };
@@ -119,6 +120,8 @@ function setIdleState() {
     resetButton.classList.add('invisible');
     idleLabel.classList.remove('invisible');
     runningDisplay.classList.add('invisible');
+    document.title = 'Pomodoro Timer';
+    resetFavicon();
 }
 
 function setActiveState(isPlaying) {
@@ -169,6 +172,8 @@ function startTimer() {
         if (shownSecond !== lastShownSecond) {
             lastShownSecond = shownSecond;
             runningTimeEl.textContent = formatTime(shownSecond);
+            document.title = `${formatTime(shownSecond)} · ${SESSION_CONFIG[currentSession].label}`;
+            updateFavicon(shownSecond, totalSeconds, appSettings.color);
         }
 
         if (current > 0) {
@@ -189,6 +194,8 @@ function pauseTimer() {
     remainingSeconds = Math.max(0, runStartRemaining - elapsed);
     stopTicking();
     setActiveState(false);
+    document.title = `${formatTime(Math.ceil(remainingSeconds))} · ${SESSION_CONFIG[currentSession].label}`;
+    updateFavicon(remainingSeconds, totalSeconds, appSettings.color);
 }
 
 function resetTimer() {
